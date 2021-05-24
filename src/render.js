@@ -242,6 +242,8 @@ const getRemoteTile = (url, callback) => {
                 return callback(err)
             }
 
+            const logDatetime = `[${(new Date()).toISOString()}]`
+
             switch (res.statusCode) {
                 case 200: {
                     return callback(null, { data })
@@ -249,14 +251,14 @@ const getRemoteTile = (url, callback) => {
                 case 202: {
                     // Request accepted but tile is not ready
                     if (!res.headers['retry-after']) {
-                        console.error(`Error with request for: ${url}\nRequest for remote tile was accepted but no Retry-After header was sent.`)
+                        console.error(`${logDatetime} Error with request for: ${url}\nRequest for remote tile was accepted but no Retry-After header was sent.`)
                         return callback(
                             new Error(`Error with request for: ${url}\nRequest for remote tile was accepted but no Retry-After header was sent.`)
                         )
                     }
 
                     const retryAfter = res.headers['retry-after']
-                    console.log(`Retry-After header received. Attempting to retrieve tile in ${retryAfter} seconds.`)
+                    console.log(`${logDatetime} Retry-After header received. Attempting to retrieve tile in ${retryAfter} seconds.`)
 
                     const retryAfterMs = parseInt(retryAfter) * 1000
                     await new Promise(resolve => setTimeout(resolve, retryAfterMs))
@@ -266,7 +268,7 @@ const getRemoteTile = (url, callback) => {
                         return callback(null, { data: retriedData })
                     } catch {
                         console.error(
-                            `Error with request for: ${url}\nstatus: ${res.statusCode}`
+                            `${logDatetime} Error with request for: ${url}\nstatus: ${res.statusCode}`
                         )
                         return callback(
                             new Error(
@@ -283,13 +285,13 @@ const getRemoteTile = (url, callback) => {
                     // Tile not found
                     // this may be valid for some tilesets that have partial coverage
                     // on servers that do not return blank tiles in these areas.
-                    console.warn(`Missing tile at: ${url}`)
+                    console.warn(`${logDatetime} Missing tile at: ${url}`)
                     return callback(null, {})
                 }
                 default: {
                     // assume error
                     console.error(
-                        `Error with request for: ${url}\nstatus: ${res.statusCode}`
+                        `${logDatetime} Error with request for: ${url}\nstatus: ${res.statusCode}`
                     )
                     return callback(
                         new Error(
