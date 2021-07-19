@@ -252,6 +252,7 @@ const getRemoteTile = (url, callback) => {
                     // Request accepted but tile is not ready
                     if (!res.headers['retry-after']) {
                         console.error(`${logDatetime} Error with request for: ${url}\nRequest for remote tile was accepted but no Retry-After header was sent.`)
+                        console.trace();
                         return callback(
                             new Error(`Error with request for: ${url}\nRequest for remote tile was accepted but no Retry-After header was sent.`)
                         )
@@ -270,6 +271,7 @@ const getRemoteTile = (url, callback) => {
                         console.error(
                             `${logDatetime} Error with request for: ${url}\nstatus: ${res.statusCode}`
                         )
+                        console.trace();
                         return callback(
                             new Error(
                                 `Error with request for: ${url}\nstatus: ${res.statusCode}`
@@ -292,7 +294,8 @@ const getRemoteTile = (url, callback) => {
                     // assume error
                     console.error(
                         `${logDatetime} Error with request for: ${url}\nstatus: ${res.statusCode}`
-                    )
+                    );
+                    console.trace();
                     return callback(
                         new Error(
                             `Error with request for: ${url}\nstatus: ${res.statusCode}`
@@ -332,7 +335,8 @@ const getRemoteAsset = (url, callback) => {
                     // assume error
                     console.error(
                         `Error with request for: ${url}\nstatus: ${res.statusCode}`
-                    )
+                    );
+                    console.trace();
                     return callback(
                         new Error(
                             `Error with request for: ${url}\nstatus: ${res.statusCode}`
@@ -381,6 +385,7 @@ const loadImages = async (images, map, callback) => {
                 map.addImage(imageName, pngImage.data, imageOptions)
             } catch (e) {
                 console.error(`Error downloading image: ${images[imageName]}`);
+                console.trace();
             }
         }
     }
@@ -621,7 +626,8 @@ export const render = (style, width = 1024, height = 1024, options) =>
                         }
                     }
                 } catch (err) {
-                    console.error('Error while making tile request: %j', err)
+                    console.error('Error while making tile request: %j', err);
+                    console.trace();
                     callback(err)
                 }
             },
@@ -643,8 +649,8 @@ export const render = (style, width = 1024, height = 1024, options) =>
                 },
                 (err, buffer) => {
                     if (err) {
-                        console.error('Error rendering map')
                         console.error(err)
+                        console.trace('Error rendering map')
                         return reject(err)
                     }
 
@@ -683,8 +689,8 @@ export const render = (style, width = 1024, height = 1024, options) =>
                             .then(resolve)
                             .catch(reject)
                     } catch (pngErr) {
-                        console.error('Error encoding PNG')
                         console.error(pngErr)
+                        console.trace('Error encoding PNG')
                         return reject(pngErr)
                     }
                 }
