@@ -8,7 +8,7 @@ Create static map images using Mapbox GL with a command line interface, an HTTP 
 
 ## Features:
 
--   Render static maps using NodeJS with [mapbox-gl-native](https://github.com/mapbox/mapbox-gl-native)
+-   Render static maps using NodeJS with our version of [mapbox-gl-native](https://github.com/amigocloud/mapbox-gl-native)
 -   Supports raster and vector tiles
 -   Compatible with Mapbox tiles (don't forget attribution) and other hosted tile providers
 -   Use locally hosted mbtiles
@@ -48,7 +48,7 @@ or
 
 Node 10 appears fully supported by the latest version of Mapbox GL. Originally, there were several issues when running on Node 10, causing segmentation faults and other errors. If you experience issues, we recommend using Node 8.
 
-Only NodeJS versions with `@mapbox/mapbox-gl-native` binaries built by Mapbox are supported via `npm install`, otherwise you need to build `@mapbox/mapbox-gl-native` from source yourself. See [build instructions](https://github.com/mapbox/mapbox-gl-native/blob/master/platform/node/DEVELOPING.md) for more information.
+Only NodeJS versions with `@amigocloud/mapbox-gl-native` binaries built by Mapbox are supported via `npm install`, otherwise you need to build `@amigocloud/mapbox-gl-native` from source yourself. See [build instructions](https://github.com/amigocloud/mapbox-gl-native/blob/master/platform/node/DEVELOPING.md) for more information.
 
 On a server, in addition to build tools, you need to install a GL environment. See the `Dockerfile` and `entrypoint.sh` for an example setup.
 

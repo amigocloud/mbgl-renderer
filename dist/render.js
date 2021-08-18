@@ -23,7 +23,7 @@ var _zlib = _interopRequireDefault(require("zlib"));
 
 var _geoViewport = _interopRequireDefault(require("@mapbox/geo-viewport"));
 
-var _mapboxGlNative = _interopRequireDefault(require("@mapbox/mapbox-gl-native"));
+var _mapboxGlNative = _interopRequireDefault(require("@amigocloud/mapbox-gl-native"));
 
 var _mbtiles = _interopRequireDefault(require("@mapbox/mbtiles"));
 
@@ -296,11 +296,11 @@ var getLocalTile = function getLocalTile(tilePath, url, callback) {
 
 var getRemoteTile = function getRemoteTile(url, callback) {
   (0, _request["default"])({
-    url: "".concat(url, "&force_retry"),
+    url: url,
     encoding: null,
     gzip: true
   }, function _callee(err, res, data) {
-    var retryAfter, retryAfterMs, retriedData;
+    var logDatetime, retryAfter, retryAfterMs, retriedData;
     return _regenerator["default"].async(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -313,9 +313,9 @@ var getRemoteTile = function getRemoteTile(url, callback) {
             return _context.abrupt("return", callback(err));
 
           case 2:
-            console.warn("res.statusCode: ".concat(res.statusCode));
+            logDatetime = "[".concat(new Date().toISOString(), "]");
             _context.t0 = res.statusCode;
-            _context.next = _context.t0 === 200 ? 6 : _context.t0 === 202 ? 7 : _context.t0 === 204 ? 27 : _context.t0 === 404 ? 28 : 30;
+            _context.next = _context.t0 === 200 ? 6 : _context.t0 === 202 ? 7 : _context.t0 === 204 ? 28 : _context.t0 === 404 ? 29 : 31;
             break;
 
           case 6:
@@ -325,65 +325,67 @@ var getRemoteTile = function getRemoteTile(url, callback) {
 
           case 7:
             if (res.headers['retry-after']) {
-              _context.next = 10;
+              _context.next = 11;
               break;
             }
 
-            console.error("Error with request for: ".concat(url, "\nRequest for remote tile was accepted but no Retry-After header was sent."));
+            console.error("".concat(logDatetime, " Error with request for: ").concat(url, "\nRequest for remote tile was accepted but no Retry-After header was sent."));
+            console.trace();
             return _context.abrupt("return", callback(new Error("Error with request for: ".concat(url, "\nRequest for remote tile was accepted but no Retry-After header was sent."))));
 
-          case 10:
+          case 11:
             retryAfter = res.headers['retry-after'];
-            console.log("Retry-After header received. Attempting to retrieve tile in ".concat(retryAfter));
+            console.log("".concat(logDatetime, " Retry-After header received. Attempting to retrieve tile in ").concat(retryAfter, " seconds."));
             retryAfterMs = parseInt(retryAfter) * 1000;
-            _context.next = 15;
+            _context.next = 16;
             return _regenerator["default"].awrap(new Promise(function (resolve) {
               return setTimeout(resolve, retryAfterMs);
             }));
 
-          case 15:
-            _context.prev = 15;
-            _context.next = 18;
+          case 16:
+            _context.prev = 16;
+            _context.next = 19;
             return _regenerator["default"].awrap((0, _requestPromise["default"])({
               url: url,
               encoding: null,
               gzip: true
             }));
 
-          case 18:
+          case 19:
             retriedData = _context.sent;
-            console.log('retriedData', retriedData);
             return _context.abrupt("return", callback(null, {
               data: retriedData
             }));
 
           case 23:
             _context.prev = 23;
-            _context.t1 = _context["catch"](15);
-            console.error("Error with request for: ".concat(url, "\nstatus: ").concat(res.statusCode));
+            _context.t1 = _context["catch"](16);
+            console.error("".concat(logDatetime, " Error with request for: ").concat(url, "\nstatus: ").concat(res.statusCode));
+            console.trace();
             return _context.abrupt("return", callback(new Error("Error with request for: ".concat(url, "\nstatus: ").concat(res.statusCode))));
 
-          case 27:
+          case 28:
             return _context.abrupt("return", callback(null, {}));
 
-          case 28:
+          case 29:
             // Tile not found
             // this may be valid for some tilesets that have partial coverage
             // on servers that do not return blank tiles in these areas.
-            console.warn("Missing tile at: ".concat(url));
+            console.warn("".concat(logDatetime, " Missing tile at: ").concat(url));
             return _context.abrupt("return", callback(null, {}));
 
-          case 30:
+          case 31:
             // assume error
-            console.error("Error with request for: ".concat(url, "\nstatus: ").concat(res.statusCode));
+            console.error("".concat(logDatetime, " Error with request for: ").concat(url, "\nstatus: ").concat(res.statusCode));
+            console.trace();
             return _context.abrupt("return", callback(new Error("Error with request for: ".concat(url, "\nstatus: ").concat(res.statusCode))));
 
-          case 32:
+          case 34:
           case "end":
             return _context.stop();
         }
       }
-    }, null, null, [[15, 23]]);
+    }, null, null, [[16, 23]]);
   });
 };
 /**
@@ -418,6 +420,7 @@ var getRemoteAsset = function getRemoteAsset(url, callback) {
         {
           // assume error
           console.error("Error with request for: ".concat(url, "\nstatus: ").concat(res.statusCode));
+          console.trace();
           return callback(new Error("Error with request for: ".concat(url, "\nstatus: ").concat(res.statusCode)));
         }
     }
@@ -454,7 +457,7 @@ var loadImages = function loadImages(images, map, callback) {
       switch (_context2.prev = _context2.next) {
         case 0:
           if (!(images !== null)) {
-            _context2.next = 18;
+            _context2.next = 19;
             break;
           }
 
@@ -462,7 +465,7 @@ var loadImages = function loadImages(images, map, callback) {
 
         case 2:
           if ((_context2.t1 = _context2.t0()).done) {
-            _context2.next = 18;
+            _context2.next = 19;
             break;
           }
 
@@ -480,22 +483,23 @@ var loadImages = function loadImages(images, map, callback) {
             pixelRatio: 1
           };
           map.addImage(imageName, pngImage.data, imageOptions);
-          _context2.next = 16;
+          _context2.next = 17;
           break;
 
         case 13:
           _context2.prev = 13;
           _context2.t2 = _context2["catch"](4);
           console.error("Error downloading image: ".concat(images[imageName]));
+          console.trace();
 
-        case 16:
+        case 17:
           _context2.next = 2;
           break;
 
-        case 18:
+        case 19:
           callback();
 
-        case 19:
+        case 20:
         case "end":
           return _context2.stop();
       }
@@ -717,6 +721,7 @@ var render = function render(style) {
           }
         } catch (err) {
           console.error('Error while making tile request: %j', err);
+          console.trace();
           callback(err);
         }
       },
@@ -734,8 +739,8 @@ var render = function render(style) {
         pitch: pitch
       }, function (err, buffer) {
         if (err) {
-          console.error('Error rendering map');
           console.error(err);
+          console.trace('Error rendering map');
           return reject(err);
         }
 
@@ -771,8 +776,8 @@ var render = function render(style) {
             }
           }).png().toBuffer().then(resolve)["catch"](reject);
         } catch (pngErr) {
-          console.error('Error encoding PNG');
           console.error(pngErr);
+          console.trace('Error encoding PNG');
           return reject(pngErr);
         }
       });

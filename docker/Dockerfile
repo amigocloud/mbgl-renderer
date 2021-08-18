@@ -1,4 +1,35 @@
-FROM node:10-buster-slim
+FROM ubuntu:focal
+
+# replace shell with bash so we can source files
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+
+# update the repository sources list
+# and install dependencies
+RUN apt-get update \
+    && apt-get install -y curl \
+    && apt-get -y autoclean
+
+# nvm environment variables
+ENV NVM_DIR /usr/local/nvm
+ENV NODE_VERSION 10.24.1
+
+# install nvm
+# https://github.com/creationix/nvm#install-script
+RUN curl --silent -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.2/install.sh | bash
+
+# install node and npm
+RUN source $NVM_DIR/nvm.sh \
+    && nvm install $NODE_VERSION \
+    && nvm alias default $NODE_VERSION \
+    && nvm use default
+
+# add node and npm to path so the commands are available
+ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
+ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
+
+# confirm installation
+RUN node -v
+RUN npm -v
 
 WORKDIR /app
 
@@ -19,6 +50,8 @@ RUN apt-get update && \
   libxxf86vm-dev \
   xvfb \
   curl \
+  libuv1-dev \
+  git \
   x11-utils && \
   rm -rf /var/lib/apt/lists/* && \
   # install node deps, then remove any that are not used in production
@@ -30,8 +63,6 @@ RUN apt-get update && \
   rm -rf "/app/node_modules/restify/benchmark" && \
   # WARNING: watch for changes to version to Yarn
   rm -rf "/opt/yarn-v1.17.3" && \
-  rm "/usr/local/bin/yarn" && \
-  rm "/usr/local/bin/yarnpkg" && \
   # remove any auto installed packages that are no longer needed
   apt-get autoremove -y
 
